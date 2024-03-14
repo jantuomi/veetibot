@@ -61,10 +61,21 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
     }
   };
 
+  const respondTaskFailed = async (err: unknown) => {
+    console.error("Task failed", err);
+    void respond({
+      text:
+        "Failed to download video, please try again later. Error: " +
+        String(err),
+      response_type: "ephemeral",
+    });
+  };
+
   addTask({
     type: "download_instagram",
     url,
     respondWithFile,
+    respondTaskFailed,
   });
 });
 
@@ -83,6 +94,7 @@ const taskLoop = async () => {
           }
         }, MAX_RETRIES);
       } catch (e) {
+        void task.respondTaskFailed(e);
         console.error("Task failed after max retries, skipping task.", task, e);
       }
     } else {

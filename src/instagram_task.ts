@@ -6,6 +6,7 @@ export interface InstagramTask {
   type: "download_instagram";
   url: string;
   respondWithFile: (filePath: string) => Promise<void>;
+  respondTaskFailed: (err: unknown) => Promise<void>;
 }
 
 export const runDownloadInstagramTask = async (task: InstagramTask) => {
