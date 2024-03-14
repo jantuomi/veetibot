@@ -12,3 +12,7 @@ export const addTask = (task: Task) => {
 export const getTask = (): Task | undefined => {
   return taskQueue.shift();
 };
+
+export const numOfTasksInQueue = () => {
+  return taskQueue.length;
+};

@@ -1,10 +1,14 @@
-import { addTask, getTask } from "./tasks";
+import { addTask, getTask, numOfTasksInQueue } from "./tasks";
 import { runDownloadInstagramTask } from "./instagram_task";
 import { runWithRetries, wait } from "./utils";
 import { AppOptions, App as SlackApp } from "@slack/bolt";
 import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
+
+const QUEUE_MAX_LENGTH = process.env.QUEUE_MAX_LENGTH
+  ? Number(process.env.QUEUE_MAX_LENGTH)
+  : 3;
 
 const slackAppConfig: AppOptions = {
   token: process.env.SLACK_BOT_TOKEN,
@@ -19,6 +23,15 @@ const app = new SlackApp(slackAppConfig);
 
 app.command("/veeti", async ({ command, ack, respond, client }) => {
   await ack();
+
+  if (numOfTasksInQueue() >= QUEUE_MAX_LENGTH) {
+    void respond({
+      text: "Too many tasks in queue, please try again later.",
+      response_type: "ephemeral",
+    });
+    return;
+  }
+
   console.log("Received command: /veeti", command.text);
   const url = command.text.trim();
 
