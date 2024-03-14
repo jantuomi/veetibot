@@ -5,7 +5,7 @@ import { wait } from "./utils";
 export interface InstagramTask {
   type: "download_instagram";
   url: string;
-  respondWithFile: (message: string, filePath: string) => Promise<void>;
+  respondWithFile: (filePath: string) => Promise<void>;
 }
 
 export const runDownloadInstagramTask = async (task: InstagramTask) => {
@@ -122,7 +122,7 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
 
     const downloadedFile = downloadedFiles[0];
 
-    await task.respondWithFile("🗿🗿🗿", `./downloads/${downloadedFile}`);
+    await task.respondWithFile(`./downloads/${downloadedFile}`);
   } finally {
     await page.close();
     await browser.close();

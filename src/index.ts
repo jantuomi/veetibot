@@ -23,11 +23,21 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
   const url = command.text.trim();
 
   if (!url.includes("instagram.com")) {
-    respond("Only instagram.com URLs are supported");
+    void respond({
+      text: "Only instagram.com URLs are supported at the moment",
+      response_type: "ephemeral",
+    });
     return;
   }
 
-  const respondWithFile = async (message: string, filePath: string) => {
+  // send a message only visible to the user who sent the command
+  void respond({
+    text: "Sharing instagram video, this can take a minute...",
+    thread_ts: command.ts,
+    response_type: "ephemeral",
+  });
+
+  const respondWithFile = async (filePath: string) => {
     try {
       console.log("Uploading file", filePath);
       const fileContent = fs.readFileSync(filePath);
@@ -36,13 +46,18 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
       console.log("Sending message to channel", command.channel_id);
       await client.filesUploadV2({
         channel_id: command.channel_id,
-        initial_comment: message,
+        initial_comment: `By: @${command.user_name}`,
         file: fileContent,
         filename: fileName,
       });
       console.log("Success");
     } catch (e) {
       console.error("Failed to upload file", e);
+      void respond({
+        text:
+          "Failed to share file, please try again later. Error: " + String(e),
+        response_type: "ephemeral",
+      });
     }
   };
 
