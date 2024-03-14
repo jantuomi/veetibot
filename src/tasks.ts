@@ -1,17 +1,7 @@
-export interface InstagramTask {
-  type: "download_instagram";
-  url: string;
-  replyId: string;
-}
+import { InstagramTask } from "./instagram_task";
 
-export interface SlackReplyTask {
-  type: "slack_reply";
-  replyId: string;
-  message: string;
-  filePath: string;
-}
-
-export type Task = InstagramTask | SlackReplyTask;
+// union of possible task types
+export type Task = InstagramTask;
 
 const taskQueue: Task[] = [];
 

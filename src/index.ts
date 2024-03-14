@@ -1,15 +1,59 @@
 import { addTask, getTask } from "./tasks";
 import { runDownloadInstagramTask } from "./instagram_task";
 import { runWithRetries, wait } from "./utils";
+import { AppOptions, App as SlackApp } from "@slack/bolt";
+import fs from "fs";
+import dotenv from "dotenv";
+dotenv.config();
 
-// TESTING DATA
-addTask({
-  type: "download_instagram",
-  url: "https://www.instagram.com/reel/C33u39RBF5p/?igsh=MXZuZ2drN2wya2JmZg==",
-  replyId: "123",
+const slackAppConfig: AppOptions = {
+  token: process.env.SLACK_BOT_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  socketMode: true,
+  appToken: process.env.SLACK_APP_TOKEN,
+  clientId: process.env.SLACK_CLIENT_ID,
+  clientSecret: process.env.SLACK_CLIENT_SECRET,
+};
+
+const app = new SlackApp(slackAppConfig);
+
+app.command("/veeti", async ({ command, ack, respond, client }) => {
+  await ack();
+  console.log("Received command: /veeti", command.text);
+  const url = command.text.trim();
+
+  if (!url.includes("instagram.com")) {
+    respond("Only instagram.com URLs are supported");
+    return;
+  }
+
+  const respondWithFile = async (message: string, filePath: string) => {
+    try {
+      console.log("Uploading file", filePath);
+      const fileContent = fs.readFileSync(filePath);
+      const extension = filePath.split(".").pop();
+      const fileName = `veeti.${extension}`;
+      console.log("Sending message to channel", command.channel_id);
+      await client.filesUploadV2({
+        channel_id: command.channel_id,
+        initial_comment: message,
+        file: fileContent,
+        filename: fileName,
+      });
+      console.log("Success");
+    } catch (e) {
+      console.error("Failed to upload file", e);
+    }
+  };
+
+  addTask({
+    type: "download_instagram",
+    url,
+    respondWithFile,
+  });
 });
 
-(async () => {
+const taskLoop = async () => {
   const MAX_RETRIES = 5;
   // Main loop
   while (true) {
@@ -19,8 +63,6 @@ addTask({
         await runWithRetries(async () => {
           if (task.type === "download_instagram") {
             await runDownloadInstagramTask(task);
-          } else if (task.type === "slack_reply") {
-            console.log("TODO slack reply task");
           } else {
             console.log("Unknown task type, skipping", task);
           }
@@ -32,4 +74,10 @@ addTask({
       await wait(1000);
     }
   }
-})();
+};
+
+// run Puppeteer tasks in background
+void taskLoop();
+
+// start listening for Slack events
+app.start();

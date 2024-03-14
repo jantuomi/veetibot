@@ -1,7 +1,12 @@
-import puppeteer, { Browser, Page, TimeoutError } from "puppeteer";
-import { InstagramTask, addTask } from "./tasks";
 import fs from "fs";
+import puppeteer, { TimeoutError } from "puppeteer";
 import { wait } from "./utils";
+
+export interface InstagramTask {
+  type: "download_instagram";
+  url: string;
+  respondWithFile: (message: string, filePath: string) => Promise<void>;
+}
 
 export const runDownloadInstagramTask = async (task: InstagramTask) => {
   const browser = await puppeteer.launch({
@@ -117,12 +122,7 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
 
     const downloadedFile = downloadedFiles[0];
 
-    addTask({
-      type: "slack_reply",
-      replyId: task.replyId,
-      message: "Here's the video you requested",
-      filePath: `./downloads/${downloadedFile}`,
-    });
+    await task.respondWithFile("🗿🗿🗿", `./downloads/${downloadedFile}`);
   } finally {
     await page.close();
     await browser.close();
