@@ -70,10 +70,7 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
     });
   };
 
-  if (
-    url.startsWith("https://instagram.com") ||
-    url.startsWith("https://www.instagram.com")
-  ) {
+  if (url.includes("instagram.com")) {
     void respond({
       text: "Sharing instagram video, this can take a minute...",
       thread_ts: command.ts,
@@ -86,10 +83,7 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
       respondWithFile,
       respondTaskFailed,
     });
-  } else if (
-    url.startsWith("https://www.tiktok.com") ||
-    url.startsWith("https://tiktok.com")
-  ) {
+  } else if (url.includes("tiktok.com")) {
     void respond({
       text: "Sharing tiktok video, this can take a minute...",
       thread_ts: command.ts,
