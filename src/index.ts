@@ -4,6 +4,7 @@ import { runWithRetries, wait } from "./utils";
 import { AppOptions, App as SlackApp } from "@slack/bolt";
 import fs from "fs";
 import dotenv from "dotenv";
+import { runDownloadTiktokTask } from "./tiktok_task";
 dotenv.config();
 
 const QUEUE_MAX_LENGTH = process.env.QUEUE_MAX_LENGTH
@@ -34,21 +35,6 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
 
   console.log("Received command: /veeti", command.text);
   const url = command.text.trim();
-
-  if (!url.includes("instagram.com")) {
-    void respond({
-      text: "Only instagram.com URLs are supported at the moment",
-      response_type: "ephemeral",
-    });
-    return;
-  }
-
-  // send a message only visible to the user who sent the command
-  void respond({
-    text: "Sharing instagram video, this can take a minute...",
-    thread_ts: command.ts,
-    response_type: "ephemeral",
-  });
 
   const respondWithFile = async (filePath: string) => {
     try {
@@ -84,12 +70,44 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
     });
   };
 
-  addTask({
-    type: "download_instagram",
-    url,
-    respondWithFile,
-    respondTaskFailed,
-  });
+  if (
+    url.startsWith("https://instagram.com") ||
+    url.startsWith("https://www.instagram.com")
+  ) {
+    void respond({
+      text: "Sharing instagram video, this can take a minute...",
+      thread_ts: command.ts,
+      response_type: "ephemeral",
+    });
+
+    addTask({
+      type: "download_instagram",
+      url,
+      respondWithFile,
+      respondTaskFailed,
+    });
+  } else if (
+    url.startsWith("https://www.tiktok.com") ||
+    url.startsWith("https://tiktok.com")
+  ) {
+    void respond({
+      text: "Sharing tiktok video, this can take a minute...",
+      thread_ts: command.ts,
+      response_type: "ephemeral",
+    });
+
+    addTask({
+      type: "download_tiktok",
+      url,
+      respondWithFile,
+      respondTaskFailed,
+    });
+  } else {
+    void respond({
+      text: "Invalid URL, please provide an Instagram or TikTok video URL.",
+      response_type: "ephemeral",
+    });
+  }
 });
 
 const taskLoop = async () => {
@@ -102,6 +120,8 @@ const taskLoop = async () => {
         await runWithRetries(async () => {
           if (task.type === "download_instagram") {
             await runDownloadInstagramTask(task);
+          } else if (task.type === "download_tiktok") {
+            await runDownloadTiktokTask(task);
           } else {
             console.log("Unknown task type, skipping", task);
           }
