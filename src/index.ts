@@ -45,7 +45,7 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
       console.log("Sending message to channel", command.channel_id);
       await client.filesUploadV2({
         channel_id: command.channel_id,
-        initial_comment: `By: @${command.user_name}`,
+        initial_comment: `Lähettäjä: @${command.user_name}`,
         file: fileContent,
         filename: fileName,
       });
