@@ -1,6 +1,7 @@
 import fs from "fs";
 import puppeteer, { TimeoutError } from "puppeteer";
 import { wait } from "./utils";
+import { getBrowser } from "./browser";
 
 export interface TikTokTask {
   type: "download_tiktok";
@@ -10,10 +11,7 @@ export interface TikTokTask {
 }
 
 export const runDownloadTiktokTask = async (task: TikTokTask) => {
-  const browser = await puppeteer.launch({
-    headless: false,
-    args: ["--shm-size=1gb"],
-  });
+  const browser = await getBrowser();
   const page = await browser.newPage();
   const client = await page.createCDPSession();
   await client.send("Page.setDownloadBehavior", {
@@ -127,6 +125,5 @@ export const runDownloadTiktokTask = async (task: TikTokTask) => {
     await task.respondWithFile(`./downloads/${downloadedFile}`);
   } finally {
     await page.close();
-    await browser.close();
   }
 };

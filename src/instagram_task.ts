@@ -1,6 +1,7 @@
 import fs from "fs";
 import puppeteer, { TimeoutError } from "puppeteer";
 import { wait } from "./utils";
+import { getBrowser } from "./browser";
 
 export interface InstagramTask {
   type: "download_instagram";
@@ -10,10 +11,7 @@ export interface InstagramTask {
 }
 
 export const runDownloadInstagramTask = async (task: InstagramTask) => {
-  const browser = await puppeteer.launch({
-    headless: false,
-    args: ["--shm-size=1gb"],
-  });
+  const browser = await getBrowser();
   const page = await browser.newPage();
   const client = await page.createCDPSession();
   await client.send("Page.setDownloadBehavior", {
@@ -126,6 +124,5 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
     await task.respondWithFile(`./downloads/${downloadedFile}`);
   } finally {
     await page.close();
-    await browser.close();
   }
 };
