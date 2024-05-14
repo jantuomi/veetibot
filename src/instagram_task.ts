@@ -105,10 +105,16 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
     console.log("Waiting for download to start");
     await wait(3000);
 
+    let downloadTimeout = 5 * 60 * 1000; // 5 minutes
     let downloadedFiles = fs.readdirSync("./downloads");
     while (downloadedFiles.some((file) => file.endsWith(".crdownload"))) {
+      if (downloadTimeout <= 0) {
+        throw new Error("Download timed out");
+      }
+
       console.log("Download still in progress, waiting");
       await wait(1000);
+      downloadTimeout -= 1000;
       downloadedFiles = fs.readdirSync("./downloads");
     }
 
