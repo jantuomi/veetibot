@@ -46,8 +46,26 @@ export const runDownloadTiktokTask = async (task: TikTokTask) => {
       }
     }
 
+    try {
+      const cont = await page.waitForSelector("button.continue-web", {
+        timeout: 3000,
+      });
+      if (cont) {
+        console.log(
+          "Looks like a 'continue using the web' dialog, clicking continue",
+        );
+        await cont.click();
+      }
+    } catch (e) {
+      if (e instanceof TimeoutError) {
+        console.log("No 'continue using the web' dialog found");
+      } else {
+        throw e;
+      }
+    }
+
     await page.type("input#url", task.url);
-    await page.click("button[type=submit]");
+    await page.click('button[type="submit"]');
 
     console.log("Waiting for a bit");
     await wait(1000);
@@ -83,7 +101,7 @@ export const runDownloadTiktokTask = async (task: TikTokTask) => {
 
     const downloadButton = await page.waitForSelector(
       "a[data-event=server01_file]",
-      { timeout: 10_000 }
+      { timeout: 10_000 },
     );
     if (!downloadButton) {
       throw new Error("Could not find download button");

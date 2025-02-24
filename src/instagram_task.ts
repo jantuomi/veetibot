@@ -29,8 +29,8 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
     });
 
     await page.goto("https://snapinsta.app/");
-    await page.type("input#url", task.url);
-    await page.click("button[type=submit]");
+    await page.type("input#sf_url", task.url);
+    await page.click("button#sf_submit");
 
     try {
       const consent = await page.waitForSelector("button.fc-cta-consent", {
@@ -82,7 +82,7 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
 
     const downloadButton = await page.waitForSelector(
       ".download-content a[data-event=click_download_btn]",
-      { timeout: 10_000 }
+      { timeout: 10_000 },
     );
     if (!downloadButton) {
       throw new Error("Could not find download button");
@@ -98,7 +98,7 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
 
     // Click outside shadow-dommed ad modal to close it and start the download
     console.log(
-      "Clicking outside the possible ad modal to close it and start the download"
+      "Clicking outside the possible ad modal to close it and start the download",
     );
     await page.mouse.click(10, 10);
 
