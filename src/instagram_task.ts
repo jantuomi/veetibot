@@ -28,9 +28,7 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
       fs.unlinkSync(`./downloads/${file}`);
     });
 
-    await page.goto("https://snapinsta.app/");
-    await page.type("input#sf_url", task.url);
-    await page.click("button#sf_submit");
+    await page.goto("https://snapins.ai/");
 
     try {
       const consent = await page.waitForSelector("button.fc-cta-consent", {
@@ -52,19 +50,19 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
     await wait(1000);
     console.log("Done waiting");
 
-    try {
-      const adModalClose = await page.waitForSelector("#adOverlay button", {
-        timeout: 3000,
-      });
-      console.log("Looks like an ad modal, clicking close");
-      await adModalClose?.click();
-    } catch (e) {
-      if (e instanceof TimeoutError) {
-        console.log("No ad modal");
-      } else {
-        throw e;
-      }
-    }
+    // try {
+    //   const adModalClose = await page.waitForSelector("#adOverlay button", {
+    //     timeout: 3000,
+    //   });
+    //   console.log("Looks like an ad modal, clicking close");
+    //   await adModalClose?.click();
+    // } catch (e) {
+    //   if (e instanceof TimeoutError) {
+    //     console.log("No ad modal");
+    //   } else {
+    //     throw e;
+    //   }
+    // }
 
     try {
       const secondAdModalClose = await page.waitForSelector("#dismiss-button", {
@@ -79,6 +77,9 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
         throw e;
       }
     }
+
+    await page.type("input#url", task.url);
+    await page.click("#btn-submit");
 
     const downloadButton = await page.waitForSelector(
       ".download-content a[data-event=click_download_btn]",
