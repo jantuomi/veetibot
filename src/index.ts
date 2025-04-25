@@ -75,6 +75,11 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
     });
   };
 
+  void respond({
+    text: "Veeti link added to task queue. Wait a moment...",
+    response_type: "ephemeral",
+  });
+
   addTask({
     type: "download_url",
     url,

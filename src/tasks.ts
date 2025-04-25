@@ -24,7 +24,7 @@ export const runDownloadUrlTask = async (task: Task) => {
     }
 
     const { stdout } = await asyncExec(
-      `yt-dlp --cookies-from-browser chromium -o "${filepath}" "${task.url}"`,
+      `yt-dlp -f mp4 --restrict-filenames -o "${filename}" -P downloads --cookies-from-browser chromium "${task.url}"`,
     );
     console.log(stdout);
     task.respondWithFile(filename);
