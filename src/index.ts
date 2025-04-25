@@ -37,7 +37,11 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
   }
 
   console.log("Received command: /veeti", command.text);
-  const url = command.text.trim();
+  const cmdText = command.text.trim();
+  const cmdParts = cmdText.split(" ");
+  const url = cmdParts[0];
+  const msg =
+    cmdParts.length > 1 ? `\nViesti: ${cmdParts.slice(1).join(" ")}` : "";
 
   const respondWithFile = async (fileName: string) => {
     try {
@@ -46,7 +50,7 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
       console.log("Sending message to channel", command.channel_id);
       await client.filesUploadV2({
         channel_id: command.channel_id,
-        initial_comment: `Lähettäjä: @${command.user_name}`,
+        initial_comment: `Lähettäjä: @${command.user_name}${msg}`,
         file: fileContent,
         filename: fileName,
       });
