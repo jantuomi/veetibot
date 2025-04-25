@@ -78,13 +78,12 @@ export const runDownloadInstagramTask = async (task: InstagramTask) => {
       }
     }
 
-    await page.type("input#url", task.url);
-    await page.click("#btn-submit");
+    await page.type("input#input-url", task.url);
+    await page.click("#submit-btn");
 
-    const downloadButton = await page.waitForSelector(
-      ".download-content a[data-event=click_download_btn]",
-      { timeout: 10_000 },
-    );
+    const downloadButton = await page.waitForSelector("a[download]", {
+      timeout: 10_000,
+    });
     if (!downloadButton) {
       throw new Error("Could not find download button");
     }
