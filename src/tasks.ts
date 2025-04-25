@@ -13,9 +13,10 @@ export const checkIfYtdlpIsInstalled = async () => {
 export const runDownloadUrlTask = async (task: Task) => {
   try {
     const filename = "veeti.mp4";
+    const filepath = `downloads/${filename}`;
     // remove the file if it exists
     try {
-      fs.rmSync(filename);
+      fs.rmSync(filepath);
     } catch (e: any) {
       if (e.code !== "ENOENT") {
         console.error("Error deleting file", e);
@@ -23,7 +24,7 @@ export const runDownloadUrlTask = async (task: Task) => {
     }
 
     const { stdout } = await asyncExec(
-      `yt-dlp --cookies-from-browser chromium -o "downloads/${filename}" "${task.url}"`,
+      `yt-dlp --cookies-from-browser chromium -o "${filepath}" "${task.url}"`,
     );
     console.log(stdout);
     task.respondWithFile(filename);
