@@ -1,10 +1,13 @@
-import { addTask, getTask, numOfTasksInQueue } from "./tasks";
-import { runDownloadInstagramTask } from "./instagram_task";
+import {
+  addTask,
+  getTask,
+  numOfTasksInQueue,
+  runDownloadUrlTask,
+} from "./tasks";
 import { runWithRetries, wait } from "./utils";
 import { AppOptions, App as SlackApp } from "@slack/bolt";
 import fs from "fs";
 import dotenv from "dotenv";
-import { runDownloadTiktokTask } from "./tiktok_task";
 dotenv.config();
 
 const QUEUE_MAX_LENGTH = process.env.QUEUE_MAX_LENGTH
@@ -36,12 +39,10 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
   console.log("Received command: /veeti", command.text);
   const url = command.text.trim();
 
-  const respondWithFile = async (filePath: string) => {
+  const respondWithFile = async (fileName: string) => {
     try {
-      console.log("Uploading file", filePath);
-      const fileContent = fs.readFileSync(filePath);
-      const extension = filePath.split(".").pop();
-      const fileName = `veeti.${extension}`;
+      console.log("Uploading file", fileName);
+      const fileContent = fs.readFileSync(`downloads/${fileName}`);
       console.log("Sending message to channel", command.channel_id);
       await client.filesUploadV2({
         channel_id: command.channel_id,
@@ -70,38 +71,12 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
     });
   };
 
-  if (url.includes("instagram.com")) {
-    void respond({
-      text: "Sharing instagram video, this can take a minute...",
-      thread_ts: command.ts,
-      response_type: "ephemeral",
-    });
-
-    addTask({
-      type: "download_instagram",
-      url,
-      respondWithFile,
-      respondTaskFailed,
-    });
-  } else if (url.includes("tiktok.com")) {
-    void respond({
-      text: "Sharing tiktok video, this can take a minute...",
-      thread_ts: command.ts,
-      response_type: "ephemeral",
-    });
-
-    addTask({
-      type: "download_tiktok",
-      url,
-      respondWithFile,
-      respondTaskFailed,
-    });
-  } else {
-    void respond({
-      text: "Invalid URL, please provide an Instagram or TikTok video URL.",
-      response_type: "ephemeral",
-    });
-  }
+  addTask({
+    type: "download_url",
+    url,
+    respondWithFile,
+    respondTaskFailed,
+  });
 });
 
 const taskLoop = async () => {
@@ -112,10 +87,8 @@ const taskLoop = async () => {
     if (task) {
       try {
         await runWithRetries(async () => {
-          if (task.type === "download_instagram") {
-            await runDownloadInstagramTask(task);
-          } else if (task.type === "download_tiktok") {
-            await runDownloadTiktokTask(task);
+          if (task.type === "download_url") {
+            await runDownloadUrlTask(task);
           } else {
             console.log("Unknown task type, skipping", task);
           }
