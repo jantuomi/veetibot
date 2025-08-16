@@ -2,3 +2,5 @@ downloads/
 node_modules/
 .env
 dist/
+creds
+IG_CREDS
