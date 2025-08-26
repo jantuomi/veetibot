@@ -1,0 +1,6 @@
+[Unit]
+Description=veetibot build service
+
+[Build]
+SetWorkingDirectory=/home/slack-veetibot/veetibot
+ImageTag=veetibot:latest

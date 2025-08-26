@@ -36,7 +36,7 @@ app.command("/veeti", async ({ command, ack, respond, client }) => {
     return;
   }
 
-  console.log("Received command: /veeti", command.text);
+  console.log("Received command: /veeti", command.text, " from ", command.user_name);
   const cmdText = command.text.trim();
   const cmdParts = cmdText.split(" ");
   const url = cmdParts[0];
