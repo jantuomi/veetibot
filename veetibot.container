@@ -8,6 +8,7 @@ RuntimeMaxSec=1d
 [Container]
 Image=veetibot.build
 Exec=npm start
+PodmanPull=always
 Volume=/home/slack-veetibot/veetibot/.env:/veetibot/.env:ro
 Volume=/home/slack-veetibot/veetibot/IG_CREDS:/veetibot/IG_CREDS:ro 
 Volume=/home/slack-veetibot/.config/chromium:/home/veetibot/.config/chromium:ro,U
