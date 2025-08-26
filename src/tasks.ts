@@ -24,7 +24,9 @@ export const runDownloadUrlTask = async (task: Task) => {
     }
 
     const { stdout } = await asyncExec(
-      `yt-dlp -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]" --restrict-filenames -o "${filename}" -P downloads --cookies-from-browser chromium "${task.url}"`,
+      `yt-dlp -f "bestvideo[ext=mp4][vcodec!*=vp9]+bestaudio/best[ext=mp4][vcodec!*=vp9]" \
+        --merge-output-format mp4 \
+        --restrict-filenames -o "${filename}" -P downloads --cookies-from-browser chromium "${task.url}"`,
     );
     console.log(stdout);
     task.respondWithFile(filename);
