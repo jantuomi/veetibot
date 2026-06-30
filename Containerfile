@@ -1,4 +1,4 @@
-FROM fedora:latest
+FROM quay.io/fedora/fedora:latest
 RUN dnf install -y npm nodejs tsc yt-dlp
 RUN groupadd veetibot && useradd -g veetibot veetibot
 RUN mkdir /veetibot && chown -R veetibot:veetibot veetibot
